@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using wilotallertime.Common.Models;
 using wilotallertime.Functions.Entities;
@@ -28,7 +29,32 @@ namespace wilotallertime.Test.Helpers
                 Type = 0
             };
         }
-
+        public static List<TimeEntity> GetTimesEntity()
+        {
+            return new List<TimeEntity>
+            {
+                new TimeEntity
+                {
+                    Consolidated = false,
+                    Date = DateTime.UtcNow,
+                    IdEmployee = 50,
+                    ETag = "*",
+                    PartitionKey = "TIME",
+                    RowKey = Guid.NewGuid().ToString(),
+                    Type = 0
+                },
+                new TimeEntity
+                {
+                    Consolidated = false,
+                    Date = DateTime.UtcNow,
+                    IdEmployee = 50,
+                    ETag = "*",
+                    PartitionKey = "TIME",
+                    RowKey = Guid.NewGuid().ToString(),
+                    Type = 1
+                }
+            };
+        }
 
         public static DefaultHttpRequest CreateHttpRequest(Guid id, Time timeRequest)
         {
@@ -57,6 +83,19 @@ namespace wilotallertime.Test.Helpers
             };
         }
 
+        public static DefaultHttpRequest CreateHttpRequest(List<Time> timeRequest)
+        {
+            string request = JsonConvert.SerializeObject(timeRequest, Formatting.Indented);
+            return new DefaultHttpRequest(new DefaultHttpContext())
+            {
+                Body = GenerateStreamFromString(request)
+            };
+        }
+
+
+
+
+
         public static DefaultHttpRequest CreateHttpRequest()
         {
             return new DefaultHttpRequest(new DefaultHttpContext());
@@ -74,6 +113,24 @@ namespace wilotallertime.Test.Helpers
             };
         }
 
+        public static List<Time> GetTimesRequest()
+        {
+            return new List<Time>
+            {
+                new Time {
+                    Consolidated = false,
+                    Date = DateTime.UtcNow,
+                    IdEmployee = 9,
+                    Type = 0
+                },
+                new Time {
+                    Consolidated = false,
+                    Date = DateTime.UtcNow,
+                    IdEmployee = 9 ,
+                    Type =1
+                }
+            };
+        }
 
         public static Stream GenerateStreamFromString(string stringToConvert)
         {
