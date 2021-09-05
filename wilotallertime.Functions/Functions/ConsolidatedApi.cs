@@ -15,7 +15,7 @@ namespace wilotallertime.Functions.Functions
 {
     public static class ConsolidatedApi
     {
-        [FunctionName(nameof(ConsolidateProcess))]
+       /* [FunctionName(nameof(ConsolidateProcess))]
         public static async Task<IActionResult> ConsolidateProcess(
               [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidated")] HttpRequest req,
               [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
@@ -123,7 +123,7 @@ namespace wilotallertime.Functions.Functions
                 Message = message,
 
             });
-        }
+        }*/
 
 
         [FunctionName(nameof(GetAllConsolidatesByDate))]
