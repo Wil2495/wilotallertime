@@ -163,6 +163,34 @@ namespace wilotallertime.Functions.Functions
         }
 
 
+        [FunctionName(nameof(GetTime))]
+        public static IActionResult GetTime(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "time/{id}")] HttpRequest req,
+            [Table("time", "TIME", "{id}", Connection = "AzureWebJobsStorage")] TimeEntity timeEntity,
+            string id,
+            ILogger log)
+        {
+            log.LogInformation($"Get  time by Id: {id} received");
+
+            if (timeEntity == null)
+            {
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSuccess = false,
+                    Message = "Time not found."
+                });
+            }
+            string message = $"Time: {id} , retrieved.";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = timeEntity
+            });
+        }
 
 
     }
