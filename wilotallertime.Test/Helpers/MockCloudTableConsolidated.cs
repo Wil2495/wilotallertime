@@ -2,25 +2,36 @@
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace wilotallertime.Test.Helpers
 {
-    public class MockCloudTableTimes : CloudTable
+    public class MockCloudTableConsolidated : CloudTable
     {
-        public MockCloudTableTimes(Uri tableAddress) : base(tableAddress)
+        public MockCloudTableConsolidated(Uri tableAddress) : base(tableAddress)
         {
 
         }
 
-        public MockCloudTableTimes(Uri tableAbsoluteUri, StorageCredentials credentials) : base(tableAbsoluteUri, credentials)
+        public MockCloudTableConsolidated(Uri tableAbsoluteUri, StorageCredentials credentials) : base(tableAbsoluteUri, credentials)
         {
         }
 
-        public MockCloudTableTimes(StorageUri tableAddress, StorageCredentials credentials) : base(tableAddress, credentials)
+        public MockCloudTableConsolidated(StorageUri tableAddress, StorageCredentials credentials) : base(tableAddress, credentials)
         {
         }
 
+
+        public override async Task<TableQuerySegment<ConsolidatedEntity>> ExecuteQuerySegmentedAsync<ConsolidatedEntity>(TableQuery<ConsolidatedEntity> query, TableContinuationToken token)
+        {
+            ConstructorInfo constructor = typeof(TableQuerySegment<ConsolidatedEntity>)
+                   .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+                   .FirstOrDefault(c => c.GetParameters().Count() == 1);
+
+            return await Task.FromResult(constructor.Invoke(new object[] { TestFactoryConsolidated.GetConsolidatedsEntity() }) as TableQuerySegment<ConsolidatedEntity>);
+        }
 
 
         public override async Task<TableResult> ExecuteAsync(TableOperation operation)
@@ -28,11 +39,8 @@ namespace wilotallertime.Test.Helpers
             return await Task.FromResult(new TableResult
             {
                 HttpStatusCode = 200,
-                Result = TestFactoryTime.GetTimeEntity()
+                Result = TestFactoryConsolidated.GetConsolidatedEntity()
             });
         }
-
-
-
     }
 }
