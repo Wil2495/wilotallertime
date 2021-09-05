@@ -16,6 +16,25 @@ namespace wilotallertime.Functions.Functions
 {
     public static class TimeApi
     {
+
+        private static string ValidateJsonTime(Time time)
+        {
+            if (time?.IdEmployee == null)
+            {
+                return "The request must have an IdEmployee";
+            }
+            if (time?.Date == null)
+            {
+                return "The request must have a Date.";
+            }
+            if (time?.Type == null)
+            {
+                return "The request must have a Type.";
+            }
+            return null;
+        }
+
+
         [FunctionName(nameof(CreateTime))]
         public static async Task<IActionResult> CreateTime(
        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "time")] HttpRequest req,
@@ -65,21 +84,64 @@ namespace wilotallertime.Functions.Functions
             });
         }
 
-        private static string ValidateJsonTime(Time time)
+        [FunctionName(nameof(UpdateTime))]
+        public static async Task<IActionResult> UpdateTime(
+           [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "time/{id}")] HttpRequest req,
+           [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
+           string id,
+           ILogger log)
         {
-            if (time?.IdEmployee == null)
+            log.LogInformation($"Update for time: {id}, received.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Time time = JsonConvert.DeserializeObject<Time>(requestBody);
+
+            if (ValidateJsonTime(time) != null)
             {
-                return "The request must have an IdEmployee";
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSuccess = false,
+                    Message = ValidateJsonTime(time)
+                });
             }
-            if (time?.Date == null)
+
+            //validate todo id
+            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", id);
+            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
+
+            if (findResult.Result == null)
             {
-                return "The request must have a Date.";
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSuccess = false,
+                    Message = "Time not found."
+                });
             }
-            if (time?.Type == null)
+
+            // Update todo 
+            TimeEntity timeEntity = (TimeEntity)findResult.Result;
+            timeEntity.Date = (DateTime)time.Date;
+            timeEntity.IdEmployee = (int)time.IdEmployee;
+            timeEntity.Type = (int)time.Type;
+
+            TableOperation addOperation = TableOperation.Replace(timeEntity);
+            await timeTable.ExecuteAsync(addOperation);
+
+            string message = $"Time: {id}, update in Time";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
             {
-                return "The request must have a Type.";
-            }
-            return null;
+                IsSuccess = true,
+                Message = message,
+                Result = timeEntity
+            });
         }
+
+
+
+
+
+
     }
 }
