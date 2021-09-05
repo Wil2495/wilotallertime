@@ -2,7 +2,7 @@
 
 namespace wilotallertime.Common.Models
 {
-    internal class Consolidated
+    public class Consolidated
     {
         public int IdEmployee { get; set; }
 

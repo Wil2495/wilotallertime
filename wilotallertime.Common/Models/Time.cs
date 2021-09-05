@@ -2,7 +2,7 @@
 
 namespace wilotallertime.Common.Models
 {
-    internal class Time
+    public class Time
     {
         public int? IdEmployee { get; set; }
 
