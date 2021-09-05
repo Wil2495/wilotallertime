@@ -49,7 +49,7 @@ namespace wilotallertime.Test.Helpers
                 }
             };
         }
-       
+
         public static DefaultHttpRequest CreateHttpRequest(Guid id)
         {
             return new DefaultHttpRequest(new DefaultHttpContext())
@@ -58,7 +58,7 @@ namespace wilotallertime.Test.Helpers
             };
         }
 
- 
+
         public static DefaultHttpRequest CreateHttpRequest(Guid id, Consolidated consolidatedRequest)
         {
             string request = JsonConvert.SerializeObject(consolidatedRequest);
@@ -133,7 +133,7 @@ namespace wilotallertime.Test.Helpers
             return stream;
         }
 
-   
+
         public static ILogger CreateLogger(LoggerTypes type = LoggerTypes.Null)
         {
             ILogger logger;
