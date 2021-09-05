@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using wilotallertime.Common.Models;
 using wilotallertime.Common.Responses;
@@ -138,7 +140,27 @@ namespace wilotallertime.Functions.Functions
             });
         }
 
+        [FunctionName(nameof(GetAllTimes))]
+        public static async Task<IActionResult> GetAllTimes(
+       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "time")] HttpRequest req,
+       [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
+           ILogger log)
+        {
+            log.LogInformation("Recieved all times received.");
 
+            TableQuery<TimeEntity> query = new TableQuery<TimeEntity>();
+            TableQuerySegment<TimeEntity> allTimes = await timeTable.ExecuteQuerySegmentedAsync(query, null);
+            List<TimeEntity> toOrderTimes = allTimes.OrderBy(x => x.IdEmployee).ThenBy(x => x.Date).ToList();
+            string message = "Retrieved all times";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = allTimes
+            });
+        }
 
 
 
