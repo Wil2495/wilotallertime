@@ -125,5 +125,33 @@ namespace wilotallertime.Functions.Functions
             });
         }
 
+
+        [FunctionName(nameof(GetAllConsolidatesByDate))]
+        public static async Task<IActionResult> GetAllConsolidatesByDate(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidated/{date}")] HttpRequest req,
+        [Table("consolidated", Connection = "AzureWebJobsStorage")] CloudTable consolidatedTable,
+        string date,
+        ILogger log)
+        {
+            log.LogInformation($"Get  consolidates by date: {date} completed.");
+            string[] valueDate = date.Split("-");
+
+            DateTime timeConsolidated = new DateTime(int.Parse(valueDate[0]), int.Parse(valueDate[1]), int.Parse(valueDate[2]));
+
+            //-------------------------------------------------- Get info of table Consolidated ------------------------------//
+            string filterDate = TableQuery.GenerateFilterConditionForDate("Date", QueryComparisons.Equal, timeConsolidated);
+            TableQuery<ConsolidatedEntity> queryConsolidated = new TableQuery<ConsolidatedEntity>().Where(filterDate);
+            TableQuerySegment<ConsolidatedEntity> allConsolidated = await consolidatedTable.ExecuteQuerySegmentedAsync(queryConsolidated, null);
+            List<ConsolidatedEntity> toOrderConsolidated = allConsolidated.OrderBy(x => x.IdEmployee).ThenBy(x => x.Date).ToList();
+            //-------------------------------------------------- Get info of table Consolidated ------------------------------//
+            string message = "Retrieved all consolidated";
+            log.LogInformation(message);
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = toOrderConsolidated
+            });
+        }
     }
 }
